@@ -2,12 +2,17 @@
 
 To compile / build
 
+Make sure you have Cmake
+
 ```shell
-g++ game.cpp -o build/game
+mkdir build
+cd build
+cmake ../
+cmake --build .
 ```
 
-To run
+To run, make sure you're inside of the build directory.
 
 ```shell
-./build/game
+./Game
 ```
