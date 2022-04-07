@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 
+#include "section.hpp"
+
 #define TOUCHED 3
 
 #define CAP_1 1
@@ -30,6 +32,9 @@ void light(int section_number, color color) {
 
 int main() {
     uint8_t touched = TOUCHED;
+
+    Section section1(1);
+    printf("SECTION %d generated\n", section1.getId());
       
     // Sense whichever glass piece has been touched
     if (touched & CAP_1) {
