@@ -60,8 +60,8 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 #define DELAYVAL 500 // Time (in milliseconds) to pause between pixels
 
 
-//Capacitive Touch Defines
-//////////////////////////
+//Capacitive Touch Defines//
+////////////////////////////
 #define CAP1 1
 #define CAP2 2
 #define CAP3 4
@@ -70,10 +70,10 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 #define CAP6 32
 #define CAP7 64
 #define CAP8 128
-//////////////////////////
+////////////////////////////
 
-//Colors
-//////////////////////////
+//        Colors          //
+////////////////////////////
 #define OFF 0,0,0
 #define RED 255,0,0
 #define ORANGE 255,128,0
@@ -82,22 +82,22 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 #define BLUE 0,0,255
 #define PURPLE 127,0,255
 #define WHITE 255,255,255
-//////////////////////////
+////////////////////////////
 
-//Light Sections
-//////////////////////////
+//     Light Sections     //
+////////////////////////////
 #define SECTION_1 1
 #define SECTION_2 2
 #define SECTION_3 3
 #define SECTION_SIZE 20
 #define SECTION_2_OFFSET 20
 #define SECTION_3_OFFSET 40
-//////////////////////////
+////////////////////////////
 
-//Other Defines
-//////////////////////////
+//      Other Defines     //
+////////////////////////////
 
-//////////////////////////
+////////////////////////////
 void setup() {
   Serial.begin(9600);
   Serial.println("CAP1188 test!");
