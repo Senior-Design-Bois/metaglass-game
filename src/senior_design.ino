@@ -1,3 +1,5 @@
+
+
 /*************************************************** 
   This is a library for the CAP1188 I2C/SPI 8-chan Capacitive Sensor
 
@@ -13,13 +15,12 @@
   Written by Limor Fried/Ladyada for Adafruit Industries.  
   BSD license, all text above must be included in any redistribution
  ****************************************************/
- 
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_NeoPixel.h>
+#include <time.h>
 #include <Adafruit_CAP1188.h>
 #include <iostream>
-#include <vector>
 #include <cstdlib>
 using namespace std;
 
@@ -99,14 +100,17 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 //      Other Defines     //
 ////////////////////////////
-
+#define MIN 1
+#define MAX 4
+#define PATTERNSIZE 3
 ////////////////////////////
 
 //        Globals         //
 ////////////////////////////
 bool hasPatternBeenDisplayed = false;
 uint8_t counter = 0;
-vector<uint8_t> userInput;
+int userInput[PATTERNSIZE];
+int test[PATTERNSIZE];
 ////////////////////////////
 void setup() {
     Serial.begin(9600);
@@ -121,12 +125,27 @@ void setup() {
     }
     Serial.println("CAP1188 found!");
 
+//Feather M0 External Interrupts//
+/////////////////////////////////
+    pinMode(digitalPinToInterrupt(A1), INPUT_PULLUP);
+    pinMode(digitalPinToInterrupt(A2), INPUT_PULLUP);
+    pinMode(digitalPinToInterrupt(A3), INPUT_PULLUP);
+    
+    attachInterrupt(A1, CAP1_INTERRUPT, FALLING);
+    attachInterrupt(A2, CAP2_INTERRUPT, FALLING);
+    attachInterrupt(A3, CAP3_INTERRUPT, FALLING);
 
+////////////////////////////////
+randomSeed(analogRead(9));
+//CAP1188 Sensitivity Settings//
+///////////////////////////////
     Wire.beginTransmission(0x28);
     Wire.write(0x1f);
     Wire.write(0x5<<4);
     Wire.endTransmission();
 }
+///////////////////////////////
+
 void turnOffSection(uint8_t section)
 {
         uint8_t i = 0;
@@ -155,6 +174,13 @@ void turnOffSection(uint8_t section)
               pixels.show();
           }
           break;         
+    }
+}
+void off()
+{
+    for(int i = 0; i < 3; i++)
+    {
+        turnOffSection(i);
     }
 }
 void lightSection(uint8_t section)
@@ -186,14 +212,16 @@ void lightSection(uint8_t section)
           }
           break;         
     }
+    delay(500);
+    turnOffSection(section);
 }
 
-void pattern(vector<uint8_t> randomPattern)
+void pattern(int randomPattern[])
 {
-    for(int i = 0; i < randomPattern.size(); i++)
+    for(int i = 0; i < PATTERNSIZE; i++)
     {
-        lightSection(i+1);
-        delay(1000);
+        lightSection(randomPattern[i]);
+        delay(500);
     }
     hasPatternBeenDisplayed = true;
 }
@@ -231,57 +259,17 @@ void levelWon(uint8_t wait)
     }
 }
 
-uint8_t getUserInput()
-{
-    uint8_t touched = cap.touched();
-    vector<uint8_t> input;
-    if(touched > 0)
-    {
-        userInput.push_back(touched);
-        return input[counter];
-        counter++;
-    }
-    return 0;
-}
-
-bool isCorrectInput(vector<uint8_t> randomPattern)
+bool isCorrectInput(int randomPattern[])
 {
     uint8_t i = 0;
     bool ok = false;
-    for(int i = 0; i < randomPattern.size(); i++)
+    for(int i = 0; i < PATTERNSIZE; i++)
     {
-        ok = userInput[i] & (1 << randomPattern[i]);
+        ok = userInput[i] == randomPattern[i];
         if(!ok)
             return ok;
     }
     return ok;
-    //pattern();
-    // if(touched & (1 << CAP1-1)) 
-    // {
-    //     lightSection(1); //lighting section 1
-    // }
-    // else if(!(touched & (1 << CAP1-1)))
-    // {
-    //     turnOffSection(1);
-    // }
-
-    // if(touched & (1 << CAP2-1)) 
-    // {
-    //     lightSection(2);
-    // }
-    // else if(!(touched & (1 << CAP2-1)))
-    // {
-    //     turnOffSection(2);
-    // }
-
-    // if(touched & (1 << CAP3-1))
-    // {
-    //     lightSection(3);
-    // } 
-    // else if(!(touched & (1 << CAP3-1)))
-    // {
-    //     turnOffSection(3);
-    // }
 }
 /*  TODO INTEGRATE SIMON SAYS GAME WITH HARDWARE:
 *   LOGIC: So once we get the first level's random pattern, we need to pass the stack of values
@@ -292,24 +280,62 @@ bool isCorrectInput(vector<uint8_t> randomPattern)
         lose.
 */
 void loop() {
-    vector<uint8_t> test;
-    for(int i = 0; i < 3; i++)
-    {
-        test.push_back(rand() % 3);
-    }
-    if(!hasPatternBeenDisplayed)
-        pattern(test);
+    
+    long tmp8;
 
-    userInput[counter] = getUserInput();
-    if(userInput.size() == test.size())
+    if(!hasPatternBeenDisplayed)
     {
+        for(int i = 0; i < PATTERNSIZE; i++)
+        {
+            test[i] = 0;
+            userInput[i] = 0;
+        }
+        
+        for(int i = 0; i < PATTERNSIZE; i++)
+        {    
+            randomSeed(analogRead(i));       
+            tmp8 = random(MIN, MAX);
+            test[i] = tmp8;
+        }
+        pattern(test);
+        delay(50);
+    }
+    
+    if(counter == PATTERNSIZE)
+    {
+        Serial.println(test[0]);
+        Serial.println(test[1]);
+        Serial.println(test[2]);
+        Serial.println("\n\n\n\n\n");
         if(isCorrectInput(test))
         {
             levelWon(50);
             hasPatternBeenDisplayed = false;
-            delay(3000); //display level pattern for 3 seconds       
+            delay(3000); //display level pattern for 3 seconds 
+            off();
+            counter = 0; //reset counter     
         }
     }
     delay(50);
 }
-   
+
+void CAP1_INTERRUPT()
+{
+//    Serial.println("Cap1 touched");
+    userInput[counter] = CAP1;
+    counter++;
+}
+
+void CAP2_INTERRUPT()
+{
+//    Serial.println("Cap2 touched");
+    userInput[counter] = CAP2;
+    counter++;  
+}
+
+void CAP3_INTERRUPT()
+{
+//    Serial.println("Cap3 touched");
+    userInput[counter] = CAP3;
+    counter++;
+}
