@@ -110,7 +110,7 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 bool hasPatternBeenDisplayed = false;
 uint8_t counter = 0;
 int userInput[PATTERNSIZE];
-int test[PATTERNSIZE];
+int randomPattern[PATTERNSIZE];
 ////////////////////////////
 void setup() {
     Serial.begin(9600);
@@ -145,6 +145,15 @@ randomSeed(analogRead(9));
     Wire.endTransmission();
 }
 ///////////////////////////////
+
+void clearGlobals()
+{
+    for(int i = 0; i < PATTERNSIZE; i++)
+    {
+        userInput[i] = 0;
+        randomPattern[i] = 0;
+    }
+}
 
 void turnOffSection(uint8_t section)
 {
@@ -226,40 +235,24 @@ void pattern(int randomPattern[])
     hasPatternBeenDisplayed = true;
 }
 
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    return pixels.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if(WheelPos < 170) {
-    WheelPos -= 85;
-    return pixels.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-}
-void levelWon(uint8_t wait)
+void levelWon()
 {
-    pixels.begin();
-    pixels.setBrightness(50);
-    pixels.show(); // Initialize all pixels to 'off'
-    for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-        for (int q=0; q < 3; q++) {
-        for (uint16_t i=0; i < pixels.numPixels(); i=i+3) {
-            pixels.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
-        }
-        pixels.show();
-
-        delay(wait);
-
-        for (uint16_t i=0; i < pixels.numPixels(); i=i+3) {
-            pixels.setPixelColor(i+q, 0);        //turn every third pixel off
-            }
-        }
-    }
+    lightSection(1);
+    delay(50);
+    lightSection(2);
+    delay(50);
+    lightSection(3);
+    delay(50);
+    off();
+    lightSection(1);
+    lightSection(2);
+    lightSection(3);
+    delay(1500); //display level pattern for 3 seconds 
+    off();
+    delay(50);
 }
 
-bool isCorrectInput(int randomPattern[])
+bool isCorrectInput()
 {
     uint8_t i = 0;
     bool ok = false;
@@ -286,33 +279,22 @@ void loop() {
     if(!hasPatternBeenDisplayed)
     {
         for(int i = 0; i < PATTERNSIZE; i++)
-        {
-            test[i] = 0;
-            userInput[i] = 0;
-        }
-        
-        for(int i = 0; i < PATTERNSIZE; i++)
         {    
-            randomSeed(analogRead(i));       
+            randomSeed(analogRead(A0));       
             tmp8 = random(MIN, MAX);
-            test[i] = tmp8;
+            randomPattern[i] = tmp8;
         }
-        pattern(test);
+        pattern(randomPattern);
         delay(50);
     }
     
     if(counter == PATTERNSIZE)
     {
-        Serial.println(test[0]);
-        Serial.println(test[1]);
-        Serial.println(test[2]);
-        Serial.println("\n\n\n\n\n");
-        if(isCorrectInput(test))
+        if(isCorrectInput())
         {
-            levelWon(50);
+            clearGlobals();
+            levelWon();
             hasPatternBeenDisplayed = false;
-            delay(3000); //display level pattern for 3 seconds 
-            off();
             counter = 0; //reset counter     
         }
     }
