@@ -90,27 +90,48 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 //     Light Sections     //
 ////////////////////////////
+//pixels 28-30: section 1
+//pixels 33-35: section 2
+//pixels 39-40: section 3
+//pixels  9-11: section 4
+//pixels   4-6: section 5
+//pixels   0-1: section 6
 #define SECTION_1 1
 #define SECTION_2 2
 #define SECTION_3 3
-#define SECTION_SIZE 20
-#define SECTION_2_OFFSET 20
-#define SECTION_3_OFFSET 40
+#define SECTION_4 4
+#define SECTION_5 5
+#define SECTION_6 6
+#define SECTION_1_START 28
+#define SECTION_2_START 33
+#define SECTION_3_START 39
+#define SECTION_4_START  9
+#define SECTION_5_START  4
+#define SECTION_6_START  0
+#define SECTION_1_END   30
+#define SECTION_2_END   35
+#define SECTION_3_END   39
+#define SECTION_4_END   11
+#define SECTION_5_END    6
+#define SECTION_6_END    1
+#define SECTION_SIZE_OF_2 2
+#define SECTION_SIZE_OF_3 3
 ////////////////////////////
 
 //      Other Defines     //
 ////////////////////////////
 #define MIN 1
-#define MAX 4
-#define PATTERNSIZE 3
+#define MAX 7
+#define PATTERNSIZE 5
 ////////////////////////////
 
 //        Globals         //
 ////////////////////////////
 bool hasPatternBeenDisplayed = false;
 uint8_t counter = 0;
-int userInput[PATTERNSIZE];
-int randomPattern[PATTERNSIZE];
+uint16_t decrementer = 0;
+uint16_t userInput[PATTERNSIZE];
+uint16_t randomPattern[PATTERNSIZE];
 ////////////////////////////
 void setup() {
     Serial.begin(9600);
@@ -130,11 +151,16 @@ void setup() {
     pinMode(digitalPinToInterrupt(A1), INPUT_PULLUP);
     pinMode(digitalPinToInterrupt(A2), INPUT_PULLUP);
     pinMode(digitalPinToInterrupt(A3), INPUT_PULLUP);
+    pinMode(digitalPinToInterrupt(A4), INPUT_PULLUP);
+    pinMode(digitalPinToInterrupt(A5), INPUT_PULLUP);
+    pinMode(digitalPinToInterrupt(SCK), INPUT_PULLUP);
     
     attachInterrupt(A1, CAP1_INTERRUPT, FALLING);
     attachInterrupt(A2, CAP2_INTERRUPT, FALLING);
     attachInterrupt(A3, CAP3_INTERRUPT, FALLING);
-
+    attachInterrupt(A4, CAP4_INTERRUPT, FALLING);
+    attachInterrupt(A5, CAP5_INTERRUPT, FALLING);
+    attachInterrupt(SCK, CAP6_INTERRUPT, FALLING);
 ////////////////////////////////
 randomSeed(analogRead(9));
 //CAP1188 Sensitivity Settings//
@@ -161,7 +187,7 @@ void turnOffSection(uint8_t section)
     switch(section)
     {
         case SECTION_1:
-          for(i = 0; i < SECTION_SIZE; i++)
+          for(i = SECTION_1_START; i < SECTION_1_END+1; i++)
           {
               pixels.setPixelColor(i, pixels.Color(OFF));
               pixels.show();   // Send the updated pixel colors to the hardware.
@@ -169,7 +195,7 @@ void turnOffSection(uint8_t section)
           break;
 
         case SECTION_2:
-          for(i = SECTION_2_OFFSET; i < SECTION_SIZE+SECTION_2_OFFSET; i++)
+          for(i = SECTION_2_START; i < SECTION_2_END+1; i++)
           {
               pixels.setPixelColor(i, pixels.Color(OFF));
               pixels.show();   // Send the updated pixel colors to the hardware.
@@ -177,19 +203,43 @@ void turnOffSection(uint8_t section)
           break;
 
         case SECTION_3:
-          for(i = SECTION_3_OFFSET; i < SECTION_SIZE+SECTION_3_OFFSET; i++)
+          for(i = SECTION_3_START; i < SECTION_3_END+1; i++)
           {
               pixels.setPixelColor(i, pixels.Color(OFF));
               pixels.show();
           }
-          break;         
+          break;    
+        case SECTION_4:
+          for(i = SECTION_4_START; i < SECTION_4_END+1; i++)
+          {
+              pixels.setPixelColor(i, pixels.Color(OFF));
+              pixels.show();   // Send the updated pixel colors to the hardware.
+          }
+          break;
+
+        case SECTION_5:
+          for(i = SECTION_5_START; i < SECTION_5_END+1; i++)
+          {
+              pixels.setPixelColor(i, pixels.Color(OFF));
+              pixels.show();   // Send the updated pixel colors to the hardware.
+          }
+          break;
+
+        case SECTION_6:
+          for(i = SECTION_6_START; i < SECTION_6_END+1; i++)
+          {
+              pixels.setPixelColor(i, pixels.Color(OFF));
+              pixels.show();
+          }
+          break;     
     }
 }
 void off()
 {
-    for(int i = 0; i < 3; i++)
+    for(int i = 0; i < NUMPIXELS; i++)
     {
-        turnOffSection(i);
+         pixels.setPixelColor(i, pixels.Color(OFF));
+         pixels.show();
     }
 }
 void lightSection(uint8_t section)
@@ -198,7 +248,7 @@ void lightSection(uint8_t section)
     switch(section)
     {
         case SECTION_1:
-          for(i = 0; i < SECTION_SIZE; i++)
+          for(i = SECTION_1_START; i < SECTION_1_END+1; i++)
           {
               pixels.setPixelColor(i, pixels.Color(RED));
               pixels.show();   // Send the updated pixel colors to the hardware.
@@ -206,28 +256,51 @@ void lightSection(uint8_t section)
           break;
 
         case SECTION_2:
-          for(i = SECTION_2_OFFSET; i < SECTION_SIZE+SECTION_2_OFFSET; i++)
+          for(i = SECTION_2_START; i < SECTION_2_END+1; i++)
           {
-              pixels.setPixelColor(i, pixels.Color(WHITE));
+              pixels.setPixelColor(i, pixels.Color(BLUE));
               pixels.show();   // Send the updated pixel colors to the hardware.
           }
           break;
 
         case SECTION_3:
-          for(i = SECTION_3_OFFSET; i < SECTION_SIZE+SECTION_3_OFFSET; i++)
+          for(i = i = SECTION_3_START; i < SECTION_3_END+1; i++)
           {
               pixels.setPixelColor(i, pixels.Color(GREEN));
               pixels.show();
           }
-          break;         
+          break;  
+        case SECTION_4:
+          for(i = SECTION_4_START; i < SECTION_4_END+1; i++)
+          {
+              pixels.setPixelColor(i, pixels.Color(YELLOW));
+              pixels.show();   // Send the updated pixel colors to the hardware.
+          }
+          break;
+
+        case SECTION_5:
+          for(i = SECTION_5_START; i < SECTION_5_END+1; i++)
+          {
+              pixels.setPixelColor(i, pixels.Color(PURPLE));
+              pixels.show();   // Send the updated pixel colors to the hardware.
+          }
+          break;
+
+        case SECTION_6:
+          for(i = i = SECTION_6_START; i < SECTION_6_END+1; i++)
+          {
+              pixels.setPixelColor(i, pixels.Color(ORANGE));
+              pixels.show();
+          }
+          break;       
     }
     delay(500);
     turnOffSection(section);
 }
 
-void pattern(int randomPattern[])
+void pattern(uint16_t randomPattern[])
 {
-    for(int i = 0; i < PATTERNSIZE; i++)
+    for(uint8_t i = 0; i < PATTERNSIZE; i++)
     {
         lightSection(randomPattern[i]);
         delay(500);
@@ -251,7 +324,32 @@ void levelWon()
     off();
     delay(50);
 }
+void gameLost()
+{
+    uint8_t i;
+    for(i = 0; i < NUMPIXELS; i++)
+    {
+        pixels.setPixelColor(i, pixels.Color(RED));
+        pixels.show();     
+    }
+    delay(50);
+    off();
+    for(i = 0; i < NUMPIXELS; i++)
+    {
+        pixels.setPixelColor(i, pixels.Color(RED));
+        pixels.show();     
+    }
+    delay(50);
+    off();
 
+    for(i = 0; i < NUMPIXELS; i++)
+    {
+        pixels.setPixelColor(i, pixels.Color(RED));
+        pixels.show();     
+    }
+    delay(50);
+    off();
+}
 bool isCorrectInput()
 {
     uint8_t i = 0;
@@ -273,9 +371,8 @@ bool isCorrectInput()
         lose.
 */
 void loop() {
-    
-    long tmp8;
 
+    long tmp8;
     if(!hasPatternBeenDisplayed)
     {
         for(int i = 0; i < PATTERNSIZE; i++)
@@ -297,27 +394,62 @@ void loop() {
             hasPatternBeenDisplayed = false;
             counter = 0; //reset counter     
         }
+        else
+        {
+            clearGlobals();
+            gameLost();
+            hasPatternBeenDisplayed = false;
+            counter = 0;
+            decrementer = 0;
+        }
     }
     delay(50);
 }
 
 void CAP1_INTERRUPT()
 {
-//    Serial.println("Cap1 touched");
+    Serial.println("Cap1 touched");
+    lightSection(1);
     userInput[counter] = CAP1;
     counter++;
 }
 
 void CAP2_INTERRUPT()
 {
-//    Serial.println("Cap2 touched");
+    Serial.println("Cap2 touched");
+    lightSection(2);
     userInput[counter] = CAP2;
     counter++;  
 }
 
 void CAP3_INTERRUPT()
 {
-//    Serial.println("Cap3 touched");
+    Serial.println("Cap3 touched");
+    lightSection(3);
     userInput[counter] = CAP3;
+    counter++;
+}
+
+void CAP4_INTERRUPT()
+{
+    Serial.println("Cap4 touched");
+    lightSection(4);
+    userInput[counter] = CAP4;
+    counter++;
+}
+
+void CAP5_INTERRUPT()
+{
+    Serial.println("Cap5 touched");
+    lightSection(5);
+    userInput[counter] = CAP5;
+    counter++;
+}
+
+void CAP6_INTERRUPT()
+{
+    Serial.println("Cap6 touched");
+    lightSection(6);
+    userInput[counter] = CAP6;
     counter++;
 }
