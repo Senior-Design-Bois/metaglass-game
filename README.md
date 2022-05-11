@@ -1,7 +1,4 @@
 # Interactive Simon Says Game
-
-## Version 1.0.0
-
 # Purpose
 
 This code is for configuring a system that allows a user to play simon says using a glass interface.
