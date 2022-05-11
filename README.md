@@ -41,8 +41,8 @@ External arduino libraries are used to configure the arduino Feather M0.
 
 ## External Interrupts
 
-External interrupts are used to be able to store a user's touch.
-The interrupts are triggered when the user has touched glass.
+External interrupts are used to store a user's touch.
+The interrupts are triggered when the user has touched the glass interface.
 
 ## LED Display Sections
 
