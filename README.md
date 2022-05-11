@@ -1,5 +1,7 @@
-# Interactive Simon Says Game
-# Purpose
+Interactive Simon Says Game
+===========================
+
+## Purpose
 
 This code is for configuring a system that allows a user to play simon says using a glass interface.
 
