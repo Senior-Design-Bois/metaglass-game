@@ -49,14 +49,14 @@ The interrupts are triggered when the user has touched the glass interface.
 An LED strip will display a pattern through glass panes
 
 The mapping below tells which pixels on the LED strip corresponds to which glass pane
-
+```
 pixels 28-30: section 1
 pixels 33-35: section 2
 pixels 39-40: section 3
 pixels  9-11: section 4
 pixels   4-6: section 5
 pixels   0-1: section 6
-
+```
 ## Instructions
 
 Plug in arduino to power source
