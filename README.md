@@ -1,11 +1,20 @@
 Interactive Simon Says Game
 ===========================
 
-This code is for configuring a system that allows a user to play simon says using a glass interface.
+This code is for configuring a system that allows a user to play Simon Says using a glass interface.
+
+## Hardware
+
+We use the [Arudio Feather](https://www.adafruit.com/product/3010) and [CAP1188 Sensor](https://learn.adafruit.com/adafruit-cap1188-breakout) to encode the logic in our demonstration. We use an [Adafruit Neopixel](https://learn.adafruit.com/adafruit-neopixel-uberguide) for our LED interfacing and display. We additionally use [ITO glass panes](https://www.adafruit.com/product/1310) from Adafruit as well.
 
 ## Libraries
 
 External arduino libraries are used to configure the arduino Feather M0.
+
+- Adafruit_NeoPixel.h
+- Adafruit_CAP1188.h
+- time.h
+- cstdlib
 
 ## External Interrupts
 
@@ -25,7 +34,11 @@ pixels  9-11: section 4
 pixels   4-6: section 5
 pixels   0-1: section 6
 ```
-## Instructions
+
+## How to run and build
+We use the [Arduino IDE](https://www.arduino.cc/en/software). There is a `.ino` file in the `/src/` folder which contains the Arduino IDE sketch to run and upload onto the Adafruit Feather.
+
+## Instructions to Use
 
 Plug in arduino to power source
 Once powered, the user will see 5 random sections light up, sections can be repeated in the pattern.
